@@ -109,7 +109,8 @@ func UpdateUserData(responseWriter http.ResponseWriter, request *http.Request) {
         "patronymic": "<PATRONYMIC>", (optional)
         "gender": "<GENDER>", (optional)
         "nationality": "<NATIONALITY>" (optional)
-    }
+  	  }
+	}
 
 	response: {
 		list:
