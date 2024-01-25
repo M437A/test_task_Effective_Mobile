@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"name_service/iternal/models"
 	rep "name_service/iternal/repository"
 	api "name_service/pkg/api/privider"
@@ -13,41 +14,40 @@ func Save(userData *models.UserData) (*models.UserData, error) {
 	var wg sync.WaitGroup
 	wg.Add(3)
 
+	var errs []error
+
 	go func() {
-		age, err := api.GetAge(name)
-		if err != nil {
-			exceptions(err)
+		defer wg.Done()
+		if age, err := api.GetAge(name); err != nil {
+			errs = append(errs, err)
+		} else {
+			userData.Age = age
 		}
-		userData.Age = age
-		wg.Done()
 	}()
 
 	go func() {
-		gender, err := api.GetGender(name)
-		if err != nil {
-			exceptions(err)
+		defer wg.Done()
+		if gender, err := api.GetGender(name); err != nil {
+			errs = append(errs, err)
+		} else {
+			userData.Gender = gender
 		}
-		userData.Gender = gender
-		wg.Done()
 	}()
 
 	go func() {
-		nationality, err := api.GetNationality(name)
-		if err != nil {
-			exceptions(err)
+		defer wg.Done()
+		if nationality, err := api.GetNationality(name); err != nil {
+			errs = append(errs, err)
+		} else {
+			userData.Nationality = nationality[0]
 		}
-		userData.Nationality = nationality[0]
-		wg.Done()
 	}()
 
 	wg.Wait()
 
-	return rep.SaveUserData(userData)
-}
-
-func exceptions(err error) error {
-	if err != nil {
-		return err
+	if len(errs) > 0 {
+		return nil, fmt.Errorf("Encountered errors: %v", errs)
 	}
-	return nil
+
+	return rep.SaveUserData(userData)
 }
